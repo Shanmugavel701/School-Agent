@@ -1,7 +1,7 @@
 document.getElementById('btn').addEventListener('click', fetchData);
 
 // Replace with your Render backend URL
-const BACKEND_URL = 'https://school-agent-backend.onrender.com';
+const BACKEND_URL = 'https://school-agent-4lcw.onrender.com';
 
 async function fetchData() {
     const q = document.getElementById('q').value.trim();
