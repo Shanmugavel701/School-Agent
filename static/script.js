@@ -1,5 +1,8 @@
 document.getElementById('btn').addEventListener('click', fetchData);
 
+// Replace with your Render backend URL
+const BACKEND_URL = 'https://school-agent-backend.onrender.com';
+
 async function fetchData() {
     const q = document.getElementById('q').value.trim();
     if (!q) { alert('Enter school name'); return; }
@@ -12,7 +15,7 @@ async function fetchData() {
     downloadBtn.style.display = "none";
 
     try {
-        const resp = await fetch(`http://127.0.0.1:8000/api/school?q=${encodeURIComponent(q)}`);
+        const resp = await fetch(`${BACKEND_URL}/api/school?q=${encodeURIComponent(q)}`);
         const data = await resp.json();
 
         if (data.error) {
@@ -42,7 +45,7 @@ async function fetchData() {
         // show download button
         downloadBtn.style.display = "inline-block";
         downloadBtn.onclick = () => {
-            window.location.href = `http://127.0.0.1:8000/api/pdf?q=${encodeURIComponent(q)}`;
+            window.location.href = `${BACKEND_URL}/api/pdf?q=${encodeURIComponent(q)}`;
         };
 
     } catch (e) {
