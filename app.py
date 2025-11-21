@@ -198,7 +198,7 @@ def api_pdf():
 
     # Step 1: Fetch school data using your existing API logic
     # Call your own /api/school endpoint internally
-    school_url = f"http://127.0.0.1:8000/api/school?q={q}"
+    school_url = f"{request.host_url.rstrip('/')}/api/school?q={q}"
     r = requests.get(school_url)
     data = r.json()
 
