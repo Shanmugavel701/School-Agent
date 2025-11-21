@@ -11,9 +11,5 @@
       "src": "/(.*)",
       "dest": "app.py"
     }
-  ],
-  "env": {
-    "SERPER_API_KEY": "@serper_api_key",
-    "GEMINI_API_KEY": "@gemini_api_key"
-  }
+  ]
 }
