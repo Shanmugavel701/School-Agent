@@ -1,9 +1,16 @@
-# Environment variables
+# ==========================
+# Environment Variables
+# ==========================
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+*.env
 
-# Python
+# ==========================
+# Python & Virtual Environments
+# ==========================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -34,23 +41,69 @@ env/
 ENV/
 env.bak/
 venv.bak/
+.venv
+.env.venv
 
-# IDE
+# ==========================
+# IDE & Editor Files
+# ==========================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
 
-# OS
+# ==========================
+# OS Files
+# ==========================
 .DS_Store
 Thumbs.db
+.AppleDouble
+.LSOverride
+*.log
+*.pot
 
-# Testing
+# ==========================
+# Testing & Coverage
+# ==========================
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
+.tox/
+.hypothesis/
 
-# Vercel
+# ==========================
+# Deployment & Build
+# ==========================
 .vercel/
+.render/
+.env.prod
+
+# ==========================
+# Node (if ever needed)
+# ==========================
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# ==========================
+# Flask & Application
+# ==========================
+instance/
+.webassets-cache
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================
+# Sensitive Files
+# ==========================
+secrets/
+credentials.json
+config.local.py
