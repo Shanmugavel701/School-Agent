@@ -1,0 +1,108 @@
+/* Background: soft blur gradient like Lovable */
+body {
+    margin: 0;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: radial-gradient(circle at top, #e8ecff 0%, #ffe0e6 45%, #f4f2ff 100%);
+    min-height: 100vh;
+}
+
+/* Hero Section */
+.hero {
+    padding: 90px 20px 40px;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 52px;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 10px;
+}
+
+.hero p {
+    margin-top: 5px;
+    font-size: 18px;
+    color: #444;
+}
+
+/* Search Bar Container */
+.search {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Input Box */
+#q {
+    width: 420px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    border: 1px solid #ddd;
+    font-size: 17px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+/* Search Button */
+#btn {
+    padding: 16px 22px;
+    background: #111;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+#btn:hover {
+    background: #333;
+}
+
+/* Output card */
+.card {
+    width: 90%;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 14px;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+}
+
+th {
+    background: rgba(245,245,245,0.7);
+    font-weight: 600;
+}
+
+.download-btn {
+    margin: 20px auto;
+    display: block;
+    background: #111;
+    color: white;
+    padding: 14px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.download-btn:hover {
+    background: #333;
+}
