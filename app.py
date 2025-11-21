@@ -10,6 +10,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import A4
 from io import BytesIO
+import traceback
 
 load_dotenv()
 
@@ -18,8 +19,12 @@ CORS(app)
 
 SERPER_API_KEY = os.getenv('SERPER_API_KEY')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-print("Loaded SERPER_API_KEY:", SERPER_API_KEY)
-print("Loaded GEMINI_API_KEY:", GEMINI_API_KEY)
+print("=" * 50)
+print("STARTUP DEBUG INFO")
+print("=" * 50)
+print("Loaded SERPER_API_KEY:", SERPER_API_KEY[:20] + "..." if SERPER_API_KEY else "NOT SET")
+print("Loaded GEMINI_API_KEY:", GEMINI_API_KEY[:20] + "..." if GEMINI_API_KEY else "NOT SET")
+print("=" * 50)
 
 
 def serper_search(query: str):
@@ -142,59 +147,64 @@ def health():
 
 @app.route('/api/school')
 def api_school():
-    q = request.args.get('q', '').strip()
-    if not q:
-        return jsonify({"error": "missing query parameter 'q'"}), 400
-
-    ys = find_website_url(f"{q} yellowslate", "yellowslate.com")
-    es = find_website_url(f"{q} edustoke", "edustoke.com")
-
-    if not ys and not es:
-        return jsonify({"error": "no pages found"}), 404
-
-    combined = ""
-    if ys:
-        try:
-            combined += "\n===== YellowSlate =====\n" + scrape_page(ys)
-        except Exception as e:
-            combined += "\n===== YellowSlate (error) =====\n" + str(e)
-
-    if es:
-        try:
-            combined += "\n===== EduStoke =====\n" + scrape_page(es)
-        except Exception as e:
-            combined += "\n===== EduStoke (error) =====\n" + str(e)
-
-    # Call Gemini via LangChain Google wrapper
-    llm = ChatGoogleGenerativeAI(model='gemini-2.5-flash', temperature=0, api_key=GEMINI_API_KEY)
-    prompt = PROMPT.format(query=q, raw=combined[:45000])
-    result = llm.invoke(prompt)
-    raw_out = result.content or ""
     try:
-        start = raw_out.find('{')
-        end = raw_out.rfind('}')
-        data = json.loads(raw_out[start:end+1])
-    except Exception:
-        data = {
-            "school_name": "",
-            "address": "",
-            "location": "",
-            "contact": "",
-            "website": "",
-            "email": "",
-            "board": "",
-            "classes_offered": "",
-            "fees": "",
-            "admission_process": "",
-            "facilities": [],
-            "transport": "",
-            "rating": "",
-            "about": combined[:2000],
-            "summary": ""
-        }
-    # attach found URLs for debugging
-    data['_sources'] = {'yellowslate': ys, 'edustoke': es}
-    return jsonify(data)
+        q = request.args.get('q', '').strip()
+        if not q:
+            return jsonify({"error": "missing query parameter 'q'"}), 400
+
+        ys = find_website_url(f"{q} yellowslate", "yellowslate.com")
+        es = find_website_url(f"{q} edustoke", "edustoke.com")
+
+        if not ys and not es:
+            return jsonify({"error": "no pages found"}), 404
+
+        combined = ""
+        if ys:
+            try:
+                combined += "\n===== YellowSlate =====\n" + scrape_page(ys)
+            except Exception as e:
+                combined += "\n===== YellowSlate (error) =====\n" + str(e)
+
+        if es:
+            try:
+                combined += "\n===== EduStoke =====\n" + scrape_page(es)
+            except Exception as e:
+                combined += "\n===== EduStoke (error) =====\n" + str(e)
+
+        # Call Gemini via LangChain Google wrapper
+        llm = ChatGoogleGenerativeAI(model='gemini-2.5-flash', temperature=0, api_key=GEMINI_API_KEY)
+        prompt = PROMPT.format(query=q, raw=combined[:45000])
+        result = llm.invoke(prompt)
+        raw_out = result.content or ""
+        try:
+            start = raw_out.find('{')
+            end = raw_out.rfind('}')
+            data = json.loads(raw_out[start:end+1])
+        except Exception:
+            data = {
+                "school_name": "",
+                "address": "",
+                "location": "",
+                "contact": "",
+                "website": "",
+                "email": "",
+                "board": "",
+                "classes_offered": "",
+                "fees": "",
+                "admission_process": "",
+                "facilities": [],
+                "transport": "",
+                "rating": "",
+                "about": combined[:2000],
+                "summary": ""
+            }
+        # attach found URLs for debugging
+        data['_sources'] = {'yellowslate': ys, 'edustoke': es}
+        return jsonify(data)
+    except Exception as e:
+        print(f"ERROR in /api/school: {str(e)}")
+        traceback.print_exc()
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 @app.route('/api/pdf')
 def api_pdf():
     q = request.args.get("q", "").strip()
