@@ -135,6 +135,11 @@ RAW TEXT:
 def index():
     return render_template('index.html')
 
+@app.route('/health')
+def health():
+    """Health check endpoint for Render"""
+    return jsonify({"status": "ok", "service": "school-agent-backend"}), 200
+
 @app.route('/api/school')
 def api_school():
     q = request.args.get('q', '').strip()
