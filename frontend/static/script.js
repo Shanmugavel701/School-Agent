@@ -1,7 +1,9 @@
 document.getElementById('btn').addEventListener('click', fetchData);
 
-// Replace with your Render backend URL or localhost for development
-const BACKEND_URL = 'http://127.0.0.1:8000';
+// Automatically detect environment - use Render URL in production, empty string for localhost
+const BACKEND_URL = window.location.hostname === 'school-agent-u680.onrender.com' 
+    ? 'https://school-agent-u680.onrender.com' 
+    : ''; // Empty string = relative URL (works for localhost)
 
 async function fetchData() {
     const q = document.getElementById('q').value.trim();
@@ -15,7 +17,19 @@ async function fetchData() {
     downloadBtn.style.display = "none";
 
     try {
-        const resp = await fetch(`${BACKEND_URL}/api/school?q=${encodeURIComponent(q)}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000); // 120 second timeout
+        
+        const resp = await fetch(`${BACKEND_URL}/api/school?q=${encodeURIComponent(q)}`, {
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        
+        if (!resp.ok) {
+            resDiv.innerHTML = `<p>Error: HTTP ${resp.status}</p>`;
+            return;
+        }
+        
         const data = await resp.json();
 
         if (data.error) {
@@ -49,6 +63,11 @@ async function fetchData() {
         };
 
     } catch (e) {
-        resDiv.innerHTML = `<p>Error: ${e.message}</p>`;
+        console.error('Fetch error:', e);
+        if (e.name === 'AbortError') {
+            resDiv.innerHTML = `<p>Request timeout - server took too long to respond. Please try again.</p>`;
+        } else {
+            resDiv.innerHTML = `<p>Error: ${e.message}</p>`;
+        }
     }
 }
