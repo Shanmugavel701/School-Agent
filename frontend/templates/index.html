@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>School Info Extractor</title>
-  <link rel="stylesheet" href="/frontend/static/style.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
   <div class="hero">
@@ -21,7 +21,7 @@
     Download PDF Report
 </button>
 </center>
-  <script src="/frontend/static/script.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
   
 </body>
 </html>
