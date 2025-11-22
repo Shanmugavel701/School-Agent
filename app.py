@@ -15,7 +15,7 @@ from google.api_core import exceptions as google_exceptions
 
 load_dotenv()
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__, static_folder='frontend/static', template_folder='frontend/templates')
 CORS(app)
 
 SERPER_API_KEY = os.getenv('SERPER_API_KEY')
