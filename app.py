@@ -11,6 +11,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import A4
 from io import BytesIO
 import traceback
+from google.api_core import exceptions as google_exceptions
 
 load_dotenv()
 
@@ -171,11 +172,44 @@ def api_school():
             except Exception as e:
                 combined += "\n===== EduStoke (error) =====\n" + str(e)
 
+        # Check if API key is set
+        if not GEMINI_API_KEY:
+            return jsonify({"error": "GEMINI_API_KEY is not set in environment variables"}), 500
+        
         # Call Gemini via LangChain Google wrapper
-        llm = ChatGoogleGenerativeAI(model='gemini-2.5-flash', temperature=0, api_key=GEMINI_API_KEY)
-        prompt = PROMPT.format(query=q, raw=combined[:45000])
-        result = llm.invoke(prompt)
-        raw_out = result.content or ""
+        try:
+            llm = ChatGoogleGenerativeAI(model='gemini-2.5-flash', temperature=0, api_key=GEMINI_API_KEY)
+            prompt = PROMPT.format(query=q, raw=combined[:45000])
+            result = llm.invoke(prompt)
+            raw_out = result.content or ""
+        except google_exceptions.PermissionDenied as e:
+            error_msg = str(e)
+            # Check for leaked API key error specifically
+            if "leaked" in error_msg.lower() or "reported as leaked" in error_msg.lower():
+                return jsonify({
+                    "error": "API key error: Your Gemini API key has been reported as leaked. Please generate a new API key from Google AI Studio (https://aistudio.google.com/apikey) and update your .env file with GEMINI_API_KEY=<new_key>"
+                }), 403
+            else:
+                return jsonify({
+                    "error": f"API key permission denied: {error_msg}. Please check your GEMINI_API_KEY in the .env file."
+                }), 403
+        except Exception as llm_error:
+            error_msg = str(llm_error)
+            # Check for leaked API key error in generic exception (in case it's wrapped)
+            if "leaked" in error_msg.lower() or "reported as leaked" in error_msg.lower():
+                return jsonify({
+                    "error": "API key error: Your Gemini API key has been reported as leaked. Please generate a new API key from Google AI Studio (https://aistudio.google.com/apikey) and update your .env file with GEMINI_API_KEY=<new_key>"
+                }), 403
+            # Check for permission denied in error message
+            elif "permission denied" in error_msg.lower():
+                return jsonify({
+                    "error": f"API key permission denied: {error_msg}. Please check your GEMINI_API_KEY in the .env file."
+                }), 403
+            # Other API errors
+            else:
+                return jsonify({
+                    "error": f"Error calling Gemini API: {error_msg}. Please check your API key and try again."
+                }), 500
         try:
             start = raw_out.find('{')
             end = raw_out.rfind('}')
@@ -202,9 +236,23 @@ def api_school():
         data['_sources'] = {'yellowslate': ys, 'edustoke': es}
         return jsonify(data)
     except Exception as e:
-        print(f"ERROR in /api/school: {str(e)}")
+        error_msg = str(e)
+        print(f"ERROR in /api/school: {error_msg}")
         traceback.print_exc()
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
+        
+        # Check for leaked API key error in outer handler (in case inner handler didn't catch it)
+        if "leaked" in error_msg.lower() or "reported as leaked" in error_msg.lower():
+            return jsonify({
+                "error": "API key error: Your Gemini API key has been reported as leaked. Please generate a new API key from Google AI Studio (https://aistudio.google.com/apikey) and update your .env file with GEMINI_API_KEY=<new_key>"
+            }), 403
+        
+        # Check for other API key related errors
+        if "API key" in error_msg or "permission denied" in error_msg.lower():
+            return jsonify({
+                "error": "API key issue detected. Please check your GEMINI_API_KEY in the .env file. If you see a 'leaked' error, generate a new key from https://aistudio.google.com/apikey"
+            }), 403
+        
+        return jsonify({"error": f"Server error: {error_msg}"}), 500
 @app.route('/api/pdf')
 def api_pdf():
     q = request.args.get("q", "").strip()
